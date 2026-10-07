@@ -10,7 +10,28 @@ default repository. It supports the HTML interface documented in
 [protocol research](docs/implementation-plan.md). Other firmware variants may need
 additional parser support.
 
-## Install from Git
+## Install with HACS
+
+[![Open your Home Assistant instance and add this repository to HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=eliaslecomte&repository=homeassistant-sanutal-air&category=integration)
+
+With [HACS](https://www.hacs.xyz/docs/use/download/download/) installed:
+
+1. Open **HACS → ⋮ → Custom repositories**.
+2. Add `https://github.com/eliaslecomte/homeassistant-sanutal-air` with type **Integration**.
+3. Find **Sanutal Air** in HACS and select **Download**.
+4. Restart Home Assistant.
+5. Open **Settings → Devices & services** to configure the discovered device, or
+   choose **Add integration → Sanutal Air** and enter its IP address or hostname.
+
+HACS downloads from the default branch until tagged releases are published.
+Install subsequent updates through HACS and restart Home Assistant afterward.
+If previously installed manually, let HACS manage the same integration directory;
+your existing configuration entry and entity IDs remain in Home Assistant.
+
+This is a custom repository; inclusion in the HACS default catalog is a later step.
+See the [HACS custom-repository guide](https://www.hacs.xyz/docs/faq/custom_repositories/).
+
+## Install manually from Git
 
 1. Clone or download this repository.
 2. Copy the entire `custom_components/sanutal_air` directory into
@@ -25,8 +46,6 @@ For upgrades, replace that integration directory and restart. Keep a copy of the
 previous version for rollback. To remove it, delete its integration entry, remove
 the directory, and restart.
 
-HACS custom-repository installation can use this GitHub repository with category
-**Integration** once the code is pushed. HACS default-list submission is a later step.
 
 ## Use
 
@@ -93,7 +112,7 @@ The pinned test harness uses Home Assistant 2026.10.0b4. The configured compatib
 floor is 2026.3.0; earlier versions and the minimum version have not yet been tested.
 The 27 automated tests pass, along with Ruff and direct hassfest validation.
 Tests cover HTML parsing, HTTP requests, setup/discovery, duplicates, reconfiguration,
-entity control, availability recovery, and unloading. CI also runs hassfest.
+entity control, availability recovery, and unloading. CI also runs hassfest and HACS repository validation.
 A live test on 2026-10-07 read initial position 3, successfully selected and read back
 positions 1, 2, 3, and 4, then restored and confirmed position 3.
 Actual installation/restart and discovery on the user's Home Assistant remain
@@ -101,3 +120,6 @@ release validation steps; local tests do not establish those outcomes.
 
 See [implementation plan](docs/implementation-plan.md) and
 [Android inspection](docs/android-inspection.md) for protocol evidence and limits.
+
+The bundled fan icon is an original project asset under the MIT license, not an
+official Sanutal logo.
