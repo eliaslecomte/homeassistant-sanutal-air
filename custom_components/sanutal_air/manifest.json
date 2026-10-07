@@ -1,0 +1,20 @@
+{
+  "domain": "sanutal_air",
+  "name": "Sanutal Air",
+  "codeowners": [
+    "@eliaslecomte"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/eliaslecomte/homeassistant-sanutal-air",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/eliaslecomte/homeassistant-sanutal-air/issues",
+  "requirements": [],
+  "version": "0.1.0",
+  "zeroconf": [
+    {
+      "type": "_http._tcp.local.",
+      "name": "esp32-webserver*"
+    }
+  ]
+}

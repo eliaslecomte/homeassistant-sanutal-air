@@ -1,0 +1,10 @@
+# Vendor packages and locally extracted app files used for protocol research.
+*.xapk
+*.apk
+/Sanutal+Air+ventilation_26.8.18_APKPure/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/

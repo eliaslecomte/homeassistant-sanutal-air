@@ -1,0 +1,43 @@
+{
+  "title": "Sanutal Air",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Sanutal Air",
+        "description": "Enter the local IP address or hostname of your ventilation unit.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      },
+      "reconfigure": {
+        "title": "Change connection",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      },
+      "confirm": {
+        "title": "Discovered Sanutal Air",
+        "description": "Add the ventilation unit at {host}?"
+      }
+    },
+    "error": {
+      "invalid_host": "Enter an IP address or hostname without http:// or a path.",
+      "cannot_connect": "Cannot connect to the ventilation unit.",
+      "unsupported_device": "The response is not a supported Sanutal Air status page."
+    },
+    "abort": {
+      "already_configured": "This endpoint is already configured.",
+      "unsupported_device": "This is not a supported Sanutal Air device.",
+      "reconfigure_successful": "Connection updated."
+    }
+  },
+  "entity": {
+    "select": {
+      "position": {
+        "name": "Ventilation position"
+      }
+    }
+  }
+}
