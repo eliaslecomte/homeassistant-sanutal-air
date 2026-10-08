@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-08
+
+- Replace the square white background with transparent official Sanutal sphere icons.
+- Add the official white Sanutal wordmark for dark themes.
+- Preserve SVG sources and document their origin.
+
+
 ## 0.1.0 — 2026-10-08
 
 Initial release of the Sanutal Air Home Assistant integration.
