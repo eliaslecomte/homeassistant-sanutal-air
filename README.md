@@ -121,5 +121,5 @@ release validation steps; local tests do not establish those outcomes.
 See [implementation plan](docs/implementation-plan.md) and
 [Android inspection](docs/android-inspection.md) for protocol evidence and limits.
 
-The bundled fan icon is an original project asset under the MIT license, not an
-official Sanutal logo.
+The integration uses the supplied Sanutal logo from `sanutal-logo.png`.
+The logo is excluded from this project’s MIT license; rights remain with its owner.
