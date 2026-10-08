@@ -23,7 +23,8 @@ With [HACS](https://www.hacs.xyz/docs/use/download/download/) installed:
 5. Open **Settings → Devices & services** to configure the discovered device, or
    choose **Add integration → Sanutal Air** and enter its IP address or hostname.
 
-HACS downloads from the default branch until tagged releases are published.
+Choose the latest published release in HACS. The default branch is also available
+for testing unreleased changes.
 Install subsequent updates through HACS and restart Home Assistant afterward.
 If previously installed manually, let HACS manage the same integration directory;
 your existing configuration entry and entity IDs remain in Home Assistant.
@@ -115,11 +116,15 @@ Tests cover HTML parsing, HTTP requests, setup/discovery, duplicates, reconfigur
 entity control, availability recovery, and unloading. CI also runs hassfest and HACS repository validation.
 A live test on 2026-10-07 read initial position 3, successfully selected and read back
 positions 1, 2, 3, and 4, then restored and confirmed position 3.
-Actual installation/restart and discovery on the user's Home Assistant remain
-release validation steps; local tests do not establish those outcomes.
+Installed on Home Assistant OS / Core 2026.10.0: Zeroconf setup succeeded, the
+selector loaded, and its reported position matched a direct device read. Inspection
+of the available installation logs found no Sanutal runtime errors. Physical-control
+changes and the declared minimum Home Assistant version still need separate testing.
 
 See [implementation plan](docs/implementation-plan.md) and
 [Android inspection](docs/android-inspection.md) for protocol evidence and limits.
 
 The integration uses the supplied Sanutal logo from `sanutal-logo.png`.
 The logo is excluded from this project’s MIT license; rights remain with its owner.
+
+See [release notes](CHANGELOG.md) and the [HACS submission checklist](docs/hacs-submission.md).
