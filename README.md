@@ -124,7 +124,9 @@ changes and the declared minimum Home Assistant version still need separate test
 See [implementation plan](docs/implementation-plan.md) and
 [Android inspection](docs/android-inspection.md) for protocol evidence and limits.
 
-The integration uses the supplied Sanutal logo from `sanutal-logo.png`.
+The integration bundles transparent icons derived from Sanutal’s official SVG artwork,
+plus a white wordmark for dark themes. Original SVG sources are in `docs/branding/`
+and come from https://sanutal.be/img/logo-white.1790769298.svg.
 The logo is excluded from this project’s MIT license; rights remain with its owner.
 
 See [release notes](CHANGELOG.md) and the [HACS submission checklist](docs/hacs-submission.md).
