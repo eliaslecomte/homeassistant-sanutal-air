@@ -36,18 +36,21 @@
   "entity": {
     "select": {
       "position": {
-        "name": "Ventilation position"
+        "name": "Ventilation level"
       }
     },
     "number": {
       "position_1_percentage": {
-        "name": "Position 1 output"
+        "name": "Level 1 speed"
       },
       "position_2_percentage": {
-        "name": "Position 2 output"
+        "name": "Level 2 speed"
       },
       "position_3_percentage": {
-        "name": "Position 3 output"
+        "name": "Level 3 speed"
+      },
+      "day": {
+        "name": "Day of week"
       }
     },
     "switch": {
@@ -63,12 +66,9 @@
         "name": "Filter maintenance required"
       }
     },
-    "sensor": {
+    "time": {
       "clock": {
-        "name": "Device clock"
-      },
-      "day": {
-        "name": "Device day of week"
+        "name": "Clock"
       }
     }
   }

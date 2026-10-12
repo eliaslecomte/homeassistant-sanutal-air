@@ -228,3 +228,24 @@ def test_diagnostics():
         ).frost_active
         is None
     )
+
+
+@pytest.mark.parametrize(
+    "field,value,path", [("T5", "20:21", "/upload/T520:21"), ("T6", 1, "/upload/T61")]
+)
+async def test_clock_setting_transaction(field, value, path):
+    client = SanutalClient(AsyncMock(), "example.local")
+    with patch.object(client, "_request", side_effect=["OK", diagnostic_page()]) as request:
+        await client.set_setting(field, value)
+        assert request.call_args_list[0].args == ("POST", path, field)
+
+
+@pytest.mark.parametrize(
+    "field,value", [("T5", "25:00"), ("T5", "12:30:45"), ("T6", 0), ("T6", True)]
+)
+async def test_invalid_clock_setting(field, value):
+    client = SanutalClient(AsyncMock(), "example.local")
+    with patch.object(client, "_request") as request:
+        with pytest.raises(ValueError):
+            await client.set_setting(field, value)
+        request.assert_not_called()

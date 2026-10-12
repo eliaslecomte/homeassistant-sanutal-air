@@ -195,8 +195,16 @@ class SanutalClient:
         async with self.lock:
             return parse_state(await self._request("GET", "/"))
 
-    async def set_setting(self, field: str, value: int | bool) -> SanutalState:
-        if field == "C1":
+    async def set_setting(self, field: str, value: int | bool | str) -> SanutalState:
+        if field == "T5":
+            if not isinstance(value, str) or not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value):
+                raise ValueError("Clock must be HH:MM")
+            payload = value
+        elif field == "T6":
+            if type(value) is not int or not 1 <= value <= 7:
+                raise ValueError("Day must be an integer from 1 to 7")
+            payload = str(value)
+        elif field == "C1":
             if not isinstance(value, bool):
                 raise ValueError("Timer must be a boolean")
             payload = str(int(value))
@@ -211,9 +219,12 @@ class SanutalClient:
             for attempt in range(3):
                 await asyncio.sleep(0.3 if attempt == 0 else 0.5)
                 state = parse_state(await self._request("GET", "/"))
-                observed = (
-                    state.timer_enabled if field == "C1" else state.percentages[int(field[1]) - 1]
-                )
+                if field in ("T5", "T6", "C1"):
+                    observed = getattr(
+                        state, {"T5": "clock", "T6": "day", "C1": "timer_enabled"}[field]
+                    )
+                else:
+                    observed = state.percentages[int(field[1]) - 1]
                 if observed == value:
                     return state
             raise SanutalError("Device did not confirm the requested setting")

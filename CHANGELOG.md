@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-10-12
+
+- Rename entity display labels to ventilation level, level speeds, clock, and day of week.
+
+- Replace clock and weekday sensors with configuration time/number controls,
+  disabled by default, with validated writes and confirmed device readback.
+
+
 ## 0.3.0 — 2026-10-12
 
 - Add read-only frost and filter-maintenance binary sensors.

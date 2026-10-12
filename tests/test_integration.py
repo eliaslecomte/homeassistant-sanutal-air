@@ -79,7 +79,7 @@ async def test_entity_control_recovery_unload(hass, client):
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    entity_id = "select.sanutal_air_ventilation_position"
+    entity_id = "select.sanutal_air_ventilation_level"
     assert hass.states.get(entity_id).state == "3"
     with patch.object(entry.runtime_data.client, "set_position", AsyncMock(return_value="2")):
         await hass.services.async_call(
@@ -170,7 +170,7 @@ async def test_configuration_entities(hass, client):
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    number = "number.sanutal_air_position_1_output"
+    number = "number.sanutal_air_level_1_speed"
     timer = "switch.sanutal_air_device_timer"
     assert hass.states.get(number).state == "10"
     assert hass.states.get(timer).state == "off"
@@ -197,11 +197,23 @@ async def test_diagnostic_entities(hass, client):
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
+    from homeassistant.const import EntityCategory
+    from homeassistant.helpers import entity_registry as er
+
+    registry = er.async_get(hass)
+    for entity_id in ("time.sanutal_air_clock", "number.sanutal_air_day_of_week"):
+        registered = registry.async_get(entity_id)
+        assert registered.entity_category == EntityCategory.CONFIG
+        assert registered.disabled_by == er.RegistryEntryDisabler.INTEGRATION
+        assert hass.states.get(entity_id) is None
+        registry.async_update_entity(entity_id, disabled_by=None)
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
     states = {
         "binary_sensor.sanutal_air_frost_active": "on",
         "binary_sensor.sanutal_air_filter_maintenance_required": "off",
-        "sensor.sanutal_air_device_clock": "20:21",
-        "sensor.sanutal_air_device_day_of_week": "1",
+        "time.sanutal_air_clock": "20:21:00",
+        "number.sanutal_air_day_of_week": "1",
     }
     entry.runtime_data.async_set_updated_data(
         SanutalState("3", (10, 30, 65), False, True, False, "20:21", 1)

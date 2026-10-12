@@ -10,7 +10,7 @@ PLATFORMS = [
     Platform.SELECT,
     Platform.NUMBER,
     Platform.SWITCH,
-    Platform.SENSOR,
+    Platform.TIME,
     Platform.BINARY_SENSOR,
 ]
 

@@ -1,7 +1,7 @@
 # Sanutal Air for Home Assistant
 
 Local control and device feedback for Sanutal AIR ventilation units. The integration
-exposes a **Ventilation position** selector with options **1–4**. It polls the unit
+exposes a **Ventilation level** selector with options **1–4**. It polls the unit
 every 30 seconds and reads back its position after a command. No cloud account or
 Android app is required.
 
@@ -50,9 +50,12 @@ the directory, and restart.
 
 ## Use
 
-Version 0.3.0 adds read-only **Frost active**, **Filter maintenance required**,
-**Device clock** (HH:MM), and **Device day of week** (the device’s raw 1–7 value).
+The integration provides **Frost active**, **Filter maintenance required**,
+**Clock** (HH:MM), and **Day of week** (the device’s raw 1–7 value).
 These report the unit’s own status and clock, not Home Assistant’s current time.
+The clock (time entity) and weekday (number entity) are configuration controls disabled by default;
+enable them in the entity settings if needed. Clock writes use whole minutes;
+weekday writes use the device’s raw 1–7 numbering and require device readback.
 Unknown indicator colours and invalid/missing clock fields remain unavailable.
 The manual identifies blue as active for both indicators; the firmware’s blue
 `#002b53` is treated as active and white `#ffffff` as inactive. The filter sensor
@@ -60,7 +63,7 @@ is a maintenance reminder, not a reset action. Weekday numbering is preserved
 until its name mapping is verified independently of the schedule editor.
 
 
-Version 0.2.0 also exposes configuration entities for **Position 1–3 output**
+Version 0.2.0 also exposes configuration entities for **Level 1–3 speed**
 (whole percentages, 1–99%) and **Device timer**. These settings are polled with the
 position, and writes require confirmed device readback. Firmware that omits a
 setting leaves its entity unavailable. Percentages are configured output levels,
@@ -73,7 +76,7 @@ Select a position from the entity's dropdown, or call:
 ```yaml
 action: select.select_option
 target:
-  entity_id: select.sanutal_air_ventilation_position
+  entity_id: select.sanutal_air_ventilation_level
 data:
   option: "3"
 ```

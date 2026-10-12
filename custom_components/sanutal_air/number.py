@@ -7,7 +7,7 @@ from .entity import SanutalEntity
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    async_add_entities([SanutalPercentage(entry, n) for n in range(1, 4)])
+    async_add_entities([*(SanutalPercentage(entry, n) for n in range(1, 4)), SanutalDay(entry)])
 
 
 class SanutalPercentage(SanutalEntity, NumberEntity):
@@ -36,3 +36,31 @@ class SanutalPercentage(SanutalEntity, NumberEntity):
         if not float(value).is_integer():
             raise ValueError("Percentage must be a whole number")
         await self.coordinator.async_set_setting(f"R{self.position}", int(value))
+
+
+class SanutalDay(SanutalEntity, NumberEntity):
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_entity_registry_enabled_default = False
+    _attr_translation_key = "day"
+    _attr_native_min_value = 1
+    _attr_native_max_value = 7
+    _attr_native_step = 1
+    _attr_mode = NumberMode.BOX
+    _attr_icon = "mdi:calendar-week"
+
+    def __init__(self, entry):
+        super().__init__(entry)
+        self._attr_unique_id = f"{entry.entry_id}_day"
+
+    @property
+    def available(self):
+        return super().available and self.native_value is not None
+
+    @property
+    def native_value(self):
+        return self.coordinator.data.day
+
+    async def async_set_native_value(self, value):
+        if not float(value).is_integer():
+            raise ValueError("Day must be a whole number")
+        await self.coordinator.async_set_setting("T6", int(value))
