@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-10-12
+
+- Add configuration numbers for position 1–3 output percentages.
+- Add a switch for the device’s built-in timer using its existing schedule.
+- Validate configuration state and confirm writes through device readback.
+
+
 ## 0.1.1 — 2026-10-08
 
 - Replace the square white background with transparent official Sanutal sphere icons.

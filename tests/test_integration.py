@@ -6,7 +6,7 @@ from homeassistant.config_entries import SOURCE_USER, SOURCE_ZEROCONF
 from homeassistant.exceptions import HomeAssistantError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.sanutal_air.api import InvalidResponse, SanutalError
+from custom_components.sanutal_air.api import InvalidResponse, SanutalError, SanutalState
 from custom_components.sanutal_air.const import DOMAIN
 
 
@@ -15,7 +15,13 @@ async def client():
     with patch(
         "custom_components.sanutal_air.api.SanutalClient.read_position", return_value="3"
     ) as read:
-        yield read
+        with patch("custom_components.sanutal_air.api.SanutalClient.read_state") as state:
+
+            async def read_state():
+                return SanutalState(await read(), (10, 30, 65), False)
+
+            state.side_effect = read_state
+            yield read
 
 
 async def test_manual_and_duplicate(hass, client):
@@ -157,3 +163,30 @@ async def test_discovery_confirmation_offline(hass, client):
     assert result["step_id"] == "confirm"
     assert result["errors"] == {"base": "cannot_connect"}
     assert result["description_placeholders"]["host"] == "127.0.0.1"
+
+
+async def test_configuration_entities(hass, client):
+    entry = MockConfigEntry(domain=DOMAIN, data={"host": "127.0.0.1", "port": 80})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    number = "number.sanutal_air_position_1_output"
+    timer = "switch.sanutal_air_device_timer"
+    assert hass.states.get(number).state == "10"
+    assert hass.states.get(timer).state == "off"
+    with patch.object(
+        entry.runtime_data.client,
+        "set_setting",
+        return_value=SanutalState("3", (20, 30, 65), False),
+    ) as setter:
+        await hass.services.async_call(
+            "number", "set_value", {"entity_id": number, "value": 20}, blocking=True
+        )
+        setter.assert_awaited_once_with("R1", 20)
+    assert hass.states.get(number).state == "20"
+    with patch.object(
+        entry.runtime_data.client, "set_setting", return_value=SanutalState("3", (20, 30, 65), True)
+    ) as setter:
+        await hass.services.async_call("switch", "turn_on", {"entity_id": timer}, blocking=True)
+        setter.assert_awaited_once_with("C1", True)
+    assert hass.states.get(timer).state == "on"

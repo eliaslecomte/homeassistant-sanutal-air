@@ -130,3 +130,62 @@ async def test_commands_are_serialized():
             "4",
         ]
     assert calls == [("POST", "B2"), ("GET", None), ("POST", "B4"), ("GET", None)]
+
+
+def settings_page(position="3", percentage=10, timer=False):
+    return page(position) + "".join(
+        f'<script>document.getElementById("{field}").{prop}={value};</script>'
+        for field, prop, value in (
+            ("R1", "value", percentage),
+            ("R2", "value", 30),
+            ("R3", "value", 65),
+            ("C1", "checked", str(timer).lower()),
+        )
+    )
+
+
+def test_configuration_parser():
+    from custom_components.sanutal_air.api import parse_state
+
+    state = parse_state(settings_page())
+    assert state.percentages == (10, 30, 65)
+    assert state.timer_enabled is False
+    assert parse_state(page()).percentages == (None, None, None)
+    assert parse_state(page()).timer_enabled is None
+    with pytest.raises(InvalidResponse):
+        parse_state(settings_page(percentage=100))
+    with pytest.raises(InvalidResponse):
+        parse_state(settings_page() + '<script>document.getElementById("R1").value=20;</script>')
+    assert (
+        parse_state(
+            page() + '<script>function x(){document.getElementById("R1").value=20;}</script>'
+        ).percentages[0]
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "field,value,path", [("R1", 20, "/upload/R120"), ("C1", True, "/upload/C11")]
+)
+async def test_setting_transaction(field, value, path):
+    client = SanutalClient(AsyncMock(), "example.local")
+    with patch.object(
+        client, "_request", side_effect=["OK", settings_page(percentage=20, timer=True)]
+    ) as request:
+        await client.set_setting(field, value)
+        assert request.call_args_list[0].args == ("POST", path, field)
+        assert request.call_count == 2
+    with patch.object(client, "_request", return_value=settings_page()):
+        with pytest.raises(SanutalError, match="confirm"):
+            await client.set_setting(field, value)
+
+
+@pytest.mark.parametrize(
+    "field,value", [("R1", 0), ("R1", 100), ("R1", True), ("R2", 1.5), ("C1", 1), ("R4", 10)]
+)
+async def test_invalid_setting(field, value):
+    client = SanutalClient(AsyncMock(), "example.local")
+    with patch.object(client, "_request") as request:
+        with pytest.raises(ValueError):
+            await client.set_setting(field, value)
+        request.assert_not_called()

@@ -7,11 +7,11 @@ from datetime import timedelta
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import SanutalError
+from .api import SanutalError, SanutalState
 from .const import DOMAIN
 
 
-class SanutalCoordinator(DataUpdateCoordinator[str]):
+class SanutalCoordinator(DataUpdateCoordinator[SanutalState]):
     def __init__(self, hass, entry, client):
         super().__init__(
             hass,
@@ -26,7 +26,7 @@ class SanutalCoordinator(DataUpdateCoordinator[str]):
     async def _async_update_data(self):
         async with self.command_lock:
             try:
-                return await self.client.read_position()
+                return await self.client.read_state()
             except SanutalError as err:
                 raise UpdateFailed(str(err)) from err
 
@@ -37,9 +37,20 @@ class SanutalCoordinator(DataUpdateCoordinator[str]):
             except SanutalError as err:
                 self.async_set_update_error(UpdateFailed(str(err)))
                 raise HomeAssistantError(str(err)) from err
-            self.async_set_updated_data(observed)
+            self.async_set_updated_data(
+                SanutalState(observed, self.data.percentages, self.data.timer_enabled)
+            )
             if observed != position:
                 raise HomeAssistantError(
                     f"Device reports position {observed}; requested {position}. "
                     "An external control may be overriding it."
                 )
+
+    async def async_set_setting(self, field, value):
+        async with self.command_lock:
+            try:
+                state = await self.client.set_setting(field, value)
+            except SanutalError as err:
+                self.async_set_update_error(UpdateFailed(str(err)))
+                raise HomeAssistantError(str(err)) from err
+            self.async_set_updated_data(state)

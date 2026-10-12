@@ -1,6 +1,6 @@
 # Sanutal Air for Home Assistant
 
-Local control and device feedback for Sanutal AIR ventilation units. Version 0.1.0
+Local control and device feedback for Sanutal AIR ventilation units. The integration
 exposes a **Ventilation position** selector with options **1–4**. It polls the unit
 every 30 seconds and reads back its position after a command. No cloud account or
 Android app is required.
@@ -49,6 +49,14 @@ the directory, and restart.
 
 
 ## Use
+
+Version 0.2.0 also exposes configuration entities for **Position 1–3 output**
+(whole percentages, 1–99%) and **Device timer**. These settings are polled with the
+position, and writes require confirmed device readback. Firmware that omits a
+setting leaves its entity unavailable. Percentages are configured output levels,
+not measured airflow or RPM. Enabling the timer uses the schedule already stored
+on the device; this integration does not edit or validate that schedule.
+
 
 Select a position from the entity's dropdown, or call:
 

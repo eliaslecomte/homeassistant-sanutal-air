@@ -2,6 +2,7 @@
 
 import asyncio
 import re
+from dataclasses import dataclass
 from html.parser import HTMLParser
 
 import aiohttp
@@ -71,6 +72,44 @@ def parse_position(html: str) -> str:
     return selected[0]
 
 
+@dataclass(frozen=True)
+class SanutalState:
+    """Confirmed state; unsupported settings remain unavailable."""
+
+    position: str
+    percentages: tuple[int | None, ...] = (None, None, None)
+    timer_enabled: bool | None = None
+
+
+SETTING = re.compile(
+    r"""\s*document\s*\.\s*getElementById\s*\(\s*["'](R[1-3]|C1)["']\s*\)"""
+    r"""\s*\.\s*(value|checked)\s*=\s*(\d+|true|false)\s*;?\s*"""
+)
+
+
+def parse_state(html: str) -> SanutalState:
+    """Parse standalone server assignments, never event handlers."""
+    position = parse_position(html)
+    page = _Page()
+    page.feed(html)
+    values = {}
+    for script in page.scripts:
+        match = SETTING.fullmatch(script)
+        if not match:
+            continue
+        field, prop, value = match.groups()
+        if field in values:
+            raise InvalidResponse("Duplicate configuration state")
+        if field == "C1" and prop == "checked" and value in ("true", "false"):
+            values[field] = value == "true"
+        elif field.startswith("R") and prop == "value" and value.isdecimal():
+            number = int(value)
+            if not 1 <= number <= 99:
+                raise InvalidResponse("Invalid position percentage")
+            values[field] = number
+    return SanutalState(position, tuple(values.get(f"R{n}") for n in range(1, 4)), values.get("C1"))
+
+
 class SanutalClient:
     """Serialize all traffic, including command/readback transactions."""
 
@@ -115,3 +154,30 @@ class SanutalClient:
                 if observed == position:
                     break
             return observed
+
+    async def read_state(self) -> SanutalState:
+        async with self.lock:
+            return parse_state(await self._request("GET", "/"))
+
+    async def set_setting(self, field: str, value: int | bool) -> SanutalState:
+        if field == "C1":
+            if not isinstance(value, bool):
+                raise ValueError("Timer must be a boolean")
+            payload = str(int(value))
+        elif field in ("R1", "R2", "R3"):
+            if type(value) is not int or not 1 <= value <= 99:
+                raise ValueError("Percentage must be an integer from 1 to 99")
+            payload = str(value)
+        else:
+            raise ValueError("Unsupported setting")
+        async with self.lock:
+            await self._request("POST", f"/upload/{field}{payload}", field)
+            for attempt in range(3):
+                await asyncio.sleep(0.3 if attempt == 0 else 0.5)
+                state = parse_state(await self._request("GET", "/"))
+                observed = (
+                    state.timer_enabled if field == "C1" else state.percentages[int(field[1]) - 1]
+                )
+                if observed == value:
+                    return state
+            raise SanutalError("Device did not confirm the requested setting")

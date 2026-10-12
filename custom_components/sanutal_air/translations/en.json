@@ -38,6 +38,22 @@
       "position": {
         "name": "Ventilation position"
       }
+    },
+    "number": {
+      "position_1_percentage": {
+        "name": "Position 1 output"
+      },
+      "position_2_percentage": {
+        "name": "Position 2 output"
+      },
+      "position_3_percentage": {
+        "name": "Position 3 output"
+      }
+    },
+    "switch": {
+      "timer": {
+        "name": "Device timer"
+      }
     }
   }
 }
