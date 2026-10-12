@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-12
+
+- Add read-only frost and filter-maintenance binary sensors.
+- Add diagnostic device clock and raw weekday-number sensors.
+- Preserve diagnostics after ventilation position commands.
+
+
 ## 0.2.0 — 2026-10-12
 
 - Add configuration numbers for position 1–3 output percentages.

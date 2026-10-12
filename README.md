@@ -50,6 +50,16 @@ the directory, and restart.
 
 ## Use
 
+Version 0.3.0 adds read-only **Frost active**, **Filter maintenance required**,
+**Device clock** (HH:MM), and **Device day of week** (the device’s raw 1–7 value).
+These report the unit’s own status and clock, not Home Assistant’s current time.
+Unknown indicator colours and invalid/missing clock fields remain unavailable.
+The manual identifies blue as active for both indicators; the firmware’s blue
+`#002b53` is treated as active and white `#ffffff` as inactive. The filter sensor
+is a maintenance reminder, not a reset action. Weekday numbering is preserved
+until its name mapping is verified independently of the schedule editor.
+
+
 Version 0.2.0 also exposes configuration entities for **Position 1–3 output**
 (whole percentages, 1–99%) and **Device timer**. These settings are polled with the
 position, and writes require confirmed device readback. Firmware that omits a

@@ -79,11 +79,21 @@ class SanutalState:
     position: str
     percentages: tuple[int | None, ...] = (None, None, None)
     timer_enabled: bool | None = None
+    frost_active: bool | None = None
+    filter_reset: bool | None = None
+    clock: str | None = None
+    day: int | None = None
 
 
 SETTING = re.compile(
     r"""\s*document\s*\.\s*getElementById\s*\(\s*["'](R[1-3]|C1)["']\s*\)"""
     r"""\s*\.\s*(value|checked)\s*=\s*(\d+|true|false)\s*;?\s*"""
+)
+
+
+STATUS = re.compile(
+    r"""\s*document\s*\.\s*getElementById\s*\(\s*["'](D2|D3|T5|T6)["']\s*\)"""
+    r"""\s*\.\s*(style\s*\.\s*backgroundColor|value)\s*=\s*(?:["']([^"']*)["']|(\d+))\s*;?\s*"""
 )
 
 
@@ -107,7 +117,33 @@ def parse_state(html: str) -> SanutalState:
             if not 1 <= number <= 99:
                 raise InvalidResponse("Invalid position percentage")
             values[field] = number
-    return SanutalState(position, tuple(values.get(f"R{n}") for n in range(1, 4)), values.get("C1"))
+    status = {}
+    for script in page.scripts:
+        match = STATUS.fullmatch(script)
+        if not match:
+            continue
+        field, prop, quoted, number = match.groups()
+        if field in status:
+            raise InvalidResponse("Duplicate diagnostic state")
+        value = quoted if quoted is not None else number
+        status[field] = None
+        if field in ("D2", "D3") and prop.replace(" ", "") == "style.backgroundColor":
+            status[field] = {"#ffffff": False, "#002b53": True}.get(value.lower())
+        elif (
+            field == "T5" and prop == "value" and re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", value)
+        ):
+            status[field] = value
+        elif field == "T6" and prop == "value" and value in tuple(str(n) for n in range(1, 8)):
+            status[field] = int(value)
+    return SanutalState(
+        position,
+        tuple(values.get(f"R{n}") for n in range(1, 4)),
+        values.get("C1"),
+        status.get("D2"),
+        status.get("D3"),
+        status.get("T5"),
+        status.get("T6"),
+    )
 
 
 class SanutalClient:

@@ -190,3 +190,30 @@ async def test_configuration_entities(hass, client):
         await hass.services.async_call("switch", "turn_on", {"entity_id": timer}, blocking=True)
         setter.assert_awaited_once_with("C1", True)
     assert hass.states.get(timer).state == "on"
+
+
+async def test_diagnostic_entities(hass, client):
+    entry = MockConfigEntry(domain=DOMAIN, data={"host": "127.0.0.1", "port": 80})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    states = {
+        "binary_sensor.sanutal_air_frost_active": "on",
+        "binary_sensor.sanutal_air_filter_maintenance_required": "off",
+        "sensor.sanutal_air_device_clock": "20:21",
+        "sensor.sanutal_air_device_day_of_week": "1",
+    }
+    entry.runtime_data.async_set_updated_data(
+        SanutalState("3", (10, 30, 65), False, True, False, "20:21", 1)
+    )
+    await hass.async_block_till_done()
+    for entity_id, value in states.items():
+        assert hass.states.get(entity_id).state == value
+    with patch.object(entry.runtime_data.client, "set_position", return_value="2"):
+        await entry.runtime_data.async_select("2")
+    assert entry.runtime_data.data.frost_active is True
+    assert entry.runtime_data.data.clock == "20:21"
+    entry.runtime_data.async_set_updated_data(SanutalState("3"))
+    await hass.async_block_till_done()
+    for entity_id in states:
+        assert hass.states.get(entity_id).state == "unavailable"

@@ -54,6 +54,22 @@
       "timer": {
         "name": "Device timer"
       }
+    },
+    "binary_sensor": {
+      "frost_active": {
+        "name": "Frost active"
+      },
+      "filter_reset": {
+        "name": "Filter maintenance required"
+      }
+    },
+    "sensor": {
+      "clock": {
+        "name": "Device clock"
+      },
+      "day": {
+        "name": "Device day of week"
+      }
     }
   }
 }

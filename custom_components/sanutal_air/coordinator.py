@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from dataclasses import replace
 from datetime import timedelta
 
 from homeassistant.exceptions import HomeAssistantError
@@ -37,9 +38,7 @@ class SanutalCoordinator(DataUpdateCoordinator[SanutalState]):
             except SanutalError as err:
                 self.async_set_update_error(UpdateFailed(str(err)))
                 raise HomeAssistantError(str(err)) from err
-            self.async_set_updated_data(
-                SanutalState(observed, self.data.percentages, self.data.timer_enabled)
-            )
+            self.async_set_updated_data(replace(self.data, position=observed))
             if observed != position:
                 raise HomeAssistantError(
                     f"Device reports position {observed}; requested {position}. "

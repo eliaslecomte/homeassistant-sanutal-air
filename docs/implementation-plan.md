@@ -106,3 +106,13 @@ Remaining deployment checks: install/restart in the actual Home Assistant instan
 confirm multicast discovery there, and validate updates originating from physical
 controls. Existing automations and helpers have not been changed. GitHub publication
 and HACS default-list submission have not been performed.
+
+## Read-only diagnostics
+
+The manufacturer manual, section 9.2.4 (PDF page 22), identifies blue frost and
+filter indicators as active. Parser mapping uses the page’s blue `#002b53` and
+white `#ffffff`; other colours are unavailable. Fields D2/D3 are status only.
+T5 provides HH:MM and T6 the device weekday number (1–7); D1 is the schedule
+editor day and must not be used as the current weekday. No clock writes or
+filter-reset command are added. Source:
+https://sanutal.be/uploads/downloads/Handleiding-Sanutal-Air-NL.pdf

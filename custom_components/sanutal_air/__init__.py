@@ -6,7 +6,13 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import SanutalClient
 from .coordinator import SanutalCoordinator
 
-PLATFORMS = [Platform.SELECT, Platform.NUMBER, Platform.SWITCH]
+PLATFORMS = [
+    Platform.SELECT,
+    Platform.NUMBER,
+    Platform.SWITCH,
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+]
 
 
 async def async_setup_entry(hass, entry):

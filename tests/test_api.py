@@ -189,3 +189,42 @@ async def test_invalid_setting(field, value):
         with pytest.raises(ValueError):
             await client.set_setting(field, value)
         request.assert_not_called()
+
+
+def diagnostic_page(frost="#ffffff", clock="20:21", day="1"):
+    return settings_page() + "".join(
+        f'<script>document.getElementById("{field}").{prop}="{value}";</script>'
+        for field, prop, value in (
+            ("D2", "style.backgroundColor", frost),
+            ("D3", "style.backgroundColor", "#002b53"),
+            ("T5", "value", clock),
+            ("T6", "value", day),
+        )
+    )
+
+
+def test_diagnostics():
+    from custom_components.sanutal_air.api import parse_state
+
+    state = parse_state(diagnostic_page())
+    assert state.frost_active is False
+    assert state.filter_reset is True
+    assert state.clock == "20:21"
+    assert state.day == 1
+    assert parse_state(diagnostic_page(frost="#002B53", day="7")).frost_active is True
+    assert parse_state(diagnostic_page(day="7")).day == 7
+    assert parse_state(page()).clock is None
+    assert parse_state(page()).frost_active is None
+    invalid = parse_state(diagnostic_page(frost="#ff0000", clock="63:I5", day="8"))
+    assert invalid.frost_active is None
+    assert invalid.clock is None
+    assert invalid.day is None
+    with pytest.raises(InvalidResponse):
+        parse_state(diagnostic_page() + '<script>document.getElementById("T6").value=2;</script>')
+    assert (
+        parse_state(
+            page() + '<script>function x(){document.getElementById("D2")'
+            '.style.backgroundColor="#002b53";}</script>'
+        ).frost_active
+        is None
+    )
